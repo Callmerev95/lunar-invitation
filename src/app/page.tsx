@@ -81,7 +81,7 @@ export default function Home() {
         brideImage="/images/couples/couple-placeholder.jpg"
         groom="Muhammad Reynard"
         bride="Putri Amanda"
-        date="Minggu, 15 Juni 2025"
+        date="Minggu, 15 Juni 2026"
         location="Ballroom Grand Hyatt Jakarta"
         coupleNames="Muhammad Reynard & Putri Amanda"
         invitationUrl="https://lunar-invitation.vercel.app"
@@ -89,7 +89,7 @@ export default function Home() {
 
       {/* Countdown Section */}
       <CountdownSection
-        targetDate="2025-06-15"
+        targetDate="2026-06-15"
         eventName="Hari Istimewa Kami"
       />
 
@@ -104,14 +104,14 @@ export default function Home() {
 
       {/* RSVP Section */}
       <RSVPSection
-        weddingDate="2025-06-15"
+        weddingDate="2026-06-15"
         googleFormUrl="https://docs.google.com/forms/d/e/1FAIpQLSc_placeholder/viewform?usp=send_form"
       />
 
       {/* QR Code Section */}
       <QRSection
         coupleNames="Muhammad Reynard & Putri Amanda"
-        weddingDate="15 Juni 2025"
+        weddingDate="15 Juni 2026"
       />
 
       {/* Music Player */}
