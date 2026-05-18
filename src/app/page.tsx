@@ -2,7 +2,7 @@
 
 import { Navbar } from "@/components/common/navbar";
 import { Footer } from "@/components/common/footer";
-import { MusicPlayer } from "@/components/common/music-player";
+import { MusicPlayer } from "@/components/common/MusicPlayer";
 import { HeroSection } from "@/components/sections/hero-section";
 import { CountdownSection } from "@/components/sections/countdown-section";
 import { EventDetails } from "@/components/sections/event-details";

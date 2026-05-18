@@ -12,7 +12,7 @@ interface MusicPlayerProps {
 export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   title = "Background Music",
   artist = "Lunar Invitation",
-  src = "/music/background-music.mp3",
+  src = "/music/background-music.wav",
   autoPlay = false,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -24,22 +24,24 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const [isReady, setIsReady] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Initialize autoplay if needed
+  // Attempt autoplay after audio is ready
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !autoPlay || !isReady) return;
+    if (!autoPlay || !isReady) return;
 
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          setIsPlaying(true);
-        })
-        .catch((error) => {
-          console.error("Autoplay failed:", error);
-          setIsPlaying(false);
-        });
-    }
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const attemptPlayback = async () => {
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch (error) {
+        console.warn("Autoplay blocked or failed:", error);
+        setIsPlaying(false);
+      }
+    };
+
+    attemptPlayback();
   }, [autoPlay, isReady]);
 
   const handleLoadedMetadata = () => {
@@ -51,39 +53,44 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
       setDuration(dur);
       setIsReady(true);
       setHasError(false);
+    } else {
+      setHasError(true);
     }
   };
 
   const handleTimeUpdate = () => {
     const audio = audioRef.current;
-    if (!audio || !isFinite(audio.duration)) return;
+    if (!audio || !isFinite(audio.duration) || audio.duration === 0) return;
 
-    setDisplayTime(audio.currentTime);
-    
+    // Update current time display
+    if (isFinite(audio.currentTime)) {
+      setDisplayTime(audio.currentTime);
+    }
+
     // Calculate safe progress percentage
-    if (audio.duration > 0) {
-      const newProgress = (audio.currentTime / audio.duration) * 100;
-      if (isFinite(newProgress)) {
-        setProgress(newProgress);
-      }
+    const newProgress = (audio.currentTime / audio.duration) * 100;
+    if (isFinite(newProgress) && newProgress >= 0 && newProgress <= 100) {
+      setProgress(newProgress);
     }
   };
 
   const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const audio = audioRef.current;
-    if (!audio || !isFinite(audio.duration) || audio.duration === 0) return;
+    if (!audio || !isFinite(audio.duration) || audio.duration === 0) {
+      return;
+    }
 
     const percentage = parseFloat(e.currentTarget.value);
     if (isFinite(percentage) && percentage >= 0 && percentage <= 100) {
       const newTime = (percentage / 100) * audio.duration;
-      if (isFinite(newTime)) {
+      if (isFinite(newTime) && newTime >= 0) {
         audio.currentTime = newTime;
       }
     }
   };
 
   const handleAudioError = () => {
-    console.error("Audio element error");
+    console.error("Audio loading error - check file path and format");
     setHasError(true);
     setIsPlaying(false);
     setIsReady(false);
@@ -105,13 +112,12 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
               setIsPlaying(true);
             })
             .catch((error) => {
-              console.error("Play error:", error);
-              setIsPlaying(false);
+              console.error("Play failed:", error);
             });
         }
       }
     } catch (error) {
-      console.error("Playback control error:", error);
+      console.error("Playback error:", error);
     }
   };
 
@@ -143,23 +149,28 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
         crossOrigin="anonymous"
       />
 
+      {/* Error State */}
+      {hasError && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-300 rounded-lg">
+          <p className="text-red-700 text-xs font-inter">
+            ⚠️ Audio file not found or cannot be loaded
+          </p>
+          <p className="text-red-600 text-xs font-inter mt-1">
+            Expected: {src}
+          </p>
+        </div>
+      )}
+
       {/* Song Info */}
       <div className="mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-[#D4AF88] font-playfair font-600 text-lg truncate">
-            {title}
-          </p>
-          {hasError && (
-            <span className="text-xs text-red-500 font-inter whitespace-nowrap ml-2">
-              Error
-            </span>
-          )}
-        </div>
+        <p className="text-[#D4AF88] font-playfair font-600 text-lg truncate">
+          {title}
+        </p>
         <p className="text-[#6B5E5E] font-inter text-sm truncate">{artist}</p>
       </div>
 
       {/* Progress Bar */}
-      {isReady && (
+      {isReady && !hasError && (
         <div className="mb-4">
           <input
             type="range"
@@ -217,9 +228,8 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
         </button>
 
         <div className="text-[#D4AF88] text-xs font-inter whitespace-nowrap shrink-0">
-          {hasError && <span className="text-red-500">Error</span>}
-          {!hasError && !isReady && <span>Loading...</span>}
-          {!hasError && isReady && (
+          {!isReady && !hasError && <span className="text-gray-500">Loading...</span>}
+          {isReady && !hasError && (
             <span>{isPlaying ? "Playing" : "Paused"}</span>
           )}
         </div>
