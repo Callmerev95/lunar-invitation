@@ -26,6 +26,9 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
 }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [attendanceStatus, setAttendanceStatus] = useState<string | undefined>(
+    undefined
+  );
 
   const {
     register,
@@ -43,7 +46,13 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
     },
   });
 
-  const attendanceStatus = watch("attendanceStatus");
+  // Update local state when form value changes to avoid React Compiler memoization issues
+  React.useEffect(() => {
+    const subscription = watch((value) => {
+      setAttendanceStatus(value.attendanceStatus);
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
 
   const onSubmit = async (data: RSVPFormData) => {
     setIsLoading(true);
