@@ -8,160 +8,141 @@ interface MusicPlayerProps {
   src?: string;
 }
 
+/**
+ * MusicPlayer Component
+ * Elegant, minimal music player with HTML5 Audio API
+ * Features: Play/Pause, Mute, Progress bar, Time display
+ */
 export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   title = "Background Music",
   artist = "Lunar Invitation",
   src = "/music/background-music.mp3",
 }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [displayTime, setDisplayTime] = useState(0);
-  const [hasError, setHasError] = useState(false);
-  const [isReady, setIsReady] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Handle when audio metadata is loaded
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  // Handle audio metadata loaded
   const handleLoadedMetadata = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
     const dur = audio.duration;
-    console.log("[MusicPlayer] Audio metadata loaded, duration:", dur);
+    console.log("[MusicPlayer] Metadata loaded. Duration:", dur);
 
     if (isFinite(dur) && dur > 0) {
       setDuration(dur);
-      setIsReady(true);
-      setHasError(false);
-    } else {
-      console.error("[MusicPlayer] Invalid duration:", dur);
-      setHasError(true);
+      setIsLoading(false);
     }
   };
 
-  // Handle when audio can play
-  const handleCanPlay = () => {
-    console.log("[MusicPlayer] Audio can play");
-    setIsReady(true);
-  };
-
-  // Update time and progress during playback
+  // Handle audio time update
   const handleTimeUpdate = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Safety check - ensure duration is valid
-    if (!isFinite(audio.duration) || audio.duration === 0) return;
-
-    // Update display time
     if (isFinite(audio.currentTime)) {
-      setDisplayTime(audio.currentTime);
-    }
-
-    // Calculate safe progress percentage
-    const newProgress = (audio.currentTime / audio.duration) * 100;
-    if (isFinite(newProgress)) {
-      setProgress(Math.min(Math.max(newProgress, 0), 100));
+      setCurrentTime(audio.currentTime);
     }
   };
 
-  // Handle progress bar interaction
+  // Handle progress bar change
   const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const audio = audioRef.current;
-    if (!audio) return;
-
-    // Safety check - ensure duration is valid
-    if (!isFinite(audio.duration) || audio.duration === 0) {
-      console.warn("[MusicPlayer] Cannot seek - duration invalid");
-      return;
-    }
+    if (!audio || !isFinite(duration) || duration === 0) return;
 
     const percentage = parseFloat(e.currentTarget.value);
-    if (isFinite(percentage) && percentage >= 0 && percentage <= 100) {
-      const newTime = (percentage / 100) * audio.duration;
-      if (isFinite(newTime)) {
-        audio.currentTime = newTime;
-      }
+    const newTime = (percentage / 100) * duration;
+
+    if (isFinite(newTime)) {
+      audio.currentTime = newTime;
     }
+  };
+
+  // Handle audio ended
+  const handleAudioEnded = () => {
+    console.log("[MusicPlayer] Track ended");
+    setIsPlaying(false);
   };
 
   // Handle audio errors
   const handleAudioError = () => {
     const audio = audioRef.current;
-    console.error("[MusicPlayer] Audio error:", {
-      src,
-      errorCode: audio?.error?.code,
-      errorMessage: audio?.error?.message,
+    console.error("[MusicPlayer] Error loading audio:", {
+      path: src,
+      code: audio?.error?.code,
+      message: audio?.error?.message,
     });
     setHasError(true);
-    setIsReady(false);
-    setIsPlaying(false);
+    setIsLoading(false);
   };
 
-  // Toggle play/pause - ONLY on user interaction (click)
-  const togglePlay = () => {
+  // Toggle play/pause
+  const handlePlayPause = () => {
     const audio = audioRef.current;
-    if (!audio || !isReady || hasError) return;
+    if (!audio || isLoading || hasError) return;
 
-    try {
-      if (isPlaying) {
-        audio.pause();
-        setIsPlaying(false);
-      } else {
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              console.log("[MusicPlayer] Playback started");
-              setIsPlaying(true);
-            })
-            .catch((err) => {
-              console.error("[MusicPlayer] Playback failed:", err);
-            });
-        }
-      }
-    } catch (error) {
-      console.error("[MusicPlayer] Play toggle error:", error);
+    if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+    } else {
+      audio.play().catch((err) => {
+        console.error("[MusicPlayer] Play error:", err);
+      });
+      setIsPlaying(true);
     }
   };
 
-  const toggleMute = () => {
+  // Toggle mute
+  const handleToggleMute = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const newMuted = !isMuted;
-    audio.muted = newMuted;
-    setIsMuted(newMuted);
+    audio.muted = !isMuted;
+    setIsMuted(!isMuted);
   };
 
+  // Format time (MM:SS)
   const formatTime = (time: number): string => {
-    if (!isFinite(time) || time < 0) return "0:00";
+    if (!isFinite(time)) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
+  // Calculate progress percentage
+  const progressPercent = isFinite(duration) && duration > 0 
+    ? (currentTime / duration) * 100 
+    : 0;
+
+  // Determine if player is ready
+  const isReady = !isLoading && !hasError && isFinite(duration) && duration > 0;
+
   return (
     <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-40 bg-white/95 rounded-3xl shadow-elegant p-4 md:p-6 w-80 md:w-96 backdrop-blur-sm">
+      {/* Audio Element */}
       <audio
         ref={audioRef}
         src={src}
         onLoadedMetadata={handleLoadedMetadata}
-        onCanPlay={handleCanPlay}
         onTimeUpdate={handleTimeUpdate}
-        onEnded={() => setIsPlaying(false)}
+        onEnded={handleAudioEnded}
         onError={handleAudioError}
         crossOrigin="anonymous"
       />
 
-      {/* Error Display */}
+      {/* Error State */}
       {hasError && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-600 text-xs font-inter">
-            ⚠️ Cannot load audio file
+          <p className="text-red-700 text-xs font-inter font-semibold">
+            ⚠️ Cannot load audio
           </p>
-          <p className="text-red-500 text-xs font-inter mt-1 truncate">
+          <p className="text-red-600 text-xs font-inter mt-1 truncate break-all">
             {src}
           </p>
         </div>
@@ -169,38 +150,37 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
       {/* Song Info */}
       <div className="mb-4">
-        <p className="text-[#D4AF88] font-playfair font-600 text-lg truncate">
+        <h3 className="text-[#D4AF88] font-playfair font-600 text-lg truncate">
           {title}
-        </p>
+        </h3>
         <p className="text-[#6B5E5E] font-inter text-sm truncate">{artist}</p>
       </div>
 
-      {/* Progress Bar - Show only when ready */}
-      {isReady && !hasError && (
-        <div className="mb-4">
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={progress}
-            onChange={handleProgressChange}
-            className="w-full h-1 bg-[#F5F0E8] rounded-full cursor-pointer accent-[#D4AF88] hover:accent-[#C4A078]"
-          />
-          <div className="flex justify-between text-xs text-[#6B5E5E] mt-2 font-inter">
-            <span>{formatTime(displayTime)}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
+      {/* Progress Bar - Show when ready or loading */}
+      <div className="mb-4">
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={progressPercent}
+          onChange={handleProgressChange}
+          disabled={!isReady}
+          className="w-full h-1 bg-[#F5F0E8] rounded-full cursor-pointer accent-[#D4AF88] hover:accent-[#C4A078] disabled:cursor-not-allowed"
+        />
+        <div className="flex justify-between text-xs text-[#6B5E5E] mt-2 font-inter">
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(duration)}</span>
         </div>
-      )}
+      </div>
 
       {/* Controls */}
       <div className="flex items-center justify-between gap-3">
         {/* Mute Button */}
         <button
-          onClick={toggleMute}
-          className="text-[#D4AF88] hover:text-[#8B4F6F] transition-colors duration-300 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleToggleMute}
+          disabled={!isReady}
+          className="text-[#D4AF88] hover:text-[#8B4F6F] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed p-1"
           title={isMuted ? "Unmute" : "Mute"}
-          disabled={hasError || !isReady}
         >
           <svg
             className="w-5 h-5"
@@ -217,10 +197,10 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
         {/* Play Button */}
         <button
-          onClick={togglePlay}
+          onClick={handlePlayPause}
+          disabled={!isReady}
           className="bg-[#D4AF88] text-[#3A2F2F] rounded-full p-3 hover:bg-[#C4A078] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
           title={isPlaying ? "Pause" : "Play"}
-          disabled={hasError || !isReady}
         >
           <svg
             className="w-6 h-6"
@@ -238,9 +218,9 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
         {/* Status Text */}
         <div className="text-[#D4AF88] text-xs font-inter whitespace-nowrap shrink-0">
           {hasError ? (
-            <span className="text-red-500">Error</span>
-          ) : !isReady ? (
-            <span className="text-gray-400">Loading...</span>
+            <span className="text-red-500 font-semibold">Error</span>
+          ) : isLoading ? (
+            <span className="text-gray-500">Loading...</span>
           ) : (
             <span>{isPlaying ? "Playing" : "Ready"}</span>
           )}
