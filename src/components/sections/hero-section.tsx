@@ -58,7 +58,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Left: Image */}
           <motion.div
-            className="relative w-full aspect-3/4 rounded-3xl overflow-hidden shadow-elegant bg-[#F5F0E8]"
+            className="relative w-full h-screen md:h-[118vh] rounded-3xl overflow-hidden shadow-elegant bg-[#F5F0E8]"
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
