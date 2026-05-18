@@ -6,6 +6,7 @@ import { MusicPlayer } from "@/components/common/music-player";
 import { HeroSection } from "@/components/sections/hero-section";
 import { CountdownSection } from "@/components/sections/countdown-section";
 import { EventDetails } from "@/components/sections/event-details";
+import { TimelineSection } from "@/components/sections/timeline-section";
 import { GallerySection } from "@/components/sections/gallery-section";
 import { RSVPSection } from "@/components/sections/rsvp-section";
 
@@ -91,6 +92,9 @@ export default function Home() {
 
       {/* Event Details Section */}
       <EventDetails events={events} />
+
+      {/* Timeline Section */}
+      <TimelineSection />
 
       {/* Gallery Section */}
       <GallerySection images={galleryImages} />
