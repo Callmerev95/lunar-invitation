@@ -1,19 +1,17 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 
 interface MusicPlayerProps {
   title?: string;
   artist?: string;
   src?: string;
-  autoPlay?: boolean;
 }
 
 export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   title = "Background Music",
   artist = "Lunar Invitation",
   src = "/music/background-music.mp3",
-  autoPlay = false,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -24,92 +22,87 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const [isReady, setIsReady] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Attempt autoplay after audio is ready
-  useEffect(() => {
-    if (!autoPlay || !isReady) return;
-
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const attemptPlayback = async () => {
-      try {
-        await audio.play();
-        setIsPlaying(true);
-      } catch (error) {
-        console.warn("Autoplay blocked or failed:", error);
-        setIsPlaying(false);
-      }
-    };
-
-    attemptPlayback();
-  }, [autoPlay, isReady]);
-
+  // Handle when audio metadata is loaded
   const handleLoadedMetadata = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    console.log("[MusicPlayer] loadedmetadata event triggered");
-    console.log("[MusicPlayer] Duration:", audio.duration);
-
     const dur = audio.duration;
+    console.log("[MusicPlayer] Audio metadata loaded, duration:", dur);
+
     if (isFinite(dur) && dur > 0) {
       setDuration(dur);
       setIsReady(true);
       setHasError(false);
-      console.log("[MusicPlayer] Audio ready. Duration:", dur);
     } else {
-      setHasError(true);
       console.error("[MusicPlayer] Invalid duration:", dur);
+      setHasError(true);
     }
   };
 
+  // Handle when audio can play
+  const handleCanPlay = () => {
+    console.log("[MusicPlayer] Audio can play");
+    setIsReady(true);
+  };
+
+  // Update time and progress during playback
   const handleTimeUpdate = () => {
     const audio = audioRef.current;
-    if (!audio || !isFinite(audio.duration) || audio.duration === 0) return;
+    if (!audio) return;
 
-    // Update current time display
+    // Safety check - ensure duration is valid
+    if (!isFinite(audio.duration) || audio.duration === 0) return;
+
+    // Update display time
     if (isFinite(audio.currentTime)) {
       setDisplayTime(audio.currentTime);
     }
 
     // Calculate safe progress percentage
     const newProgress = (audio.currentTime / audio.duration) * 100;
-    if (isFinite(newProgress) && newProgress >= 0 && newProgress <= 100) {
-      setProgress(newProgress);
+    if (isFinite(newProgress)) {
+      setProgress(Math.min(Math.max(newProgress, 0), 100));
     }
   };
 
+  // Handle progress bar interaction
   const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const audio = audioRef.current;
-    if (!audio || !isFinite(audio.duration) || audio.duration === 0) {
+    if (!audio) return;
+
+    // Safety check - ensure duration is valid
+    if (!isFinite(audio.duration) || audio.duration === 0) {
+      console.warn("[MusicPlayer] Cannot seek - duration invalid");
       return;
     }
 
     const percentage = parseFloat(e.currentTarget.value);
     if (isFinite(percentage) && percentage >= 0 && percentage <= 100) {
       const newTime = (percentage / 100) * audio.duration;
-      if (isFinite(newTime) && newTime >= 0) {
+      if (isFinite(newTime)) {
         audio.currentTime = newTime;
       }
     }
   };
 
+  // Handle audio errors
   const handleAudioError = () => {
     const audio = audioRef.current;
-    console.error("[MusicPlayer] Audio error event triggered");
-    console.error("[MusicPlayer] Expected path:", audio?.src);
-    console.error("[MusicPlayer] Error details:", {
-      error: audio?.error?.code,
-      message: audio?.error?.message,
+    console.error("[MusicPlayer] Audio error:", {
+      src,
+      errorCode: audio?.error?.code,
+      errorMessage: audio?.error?.message,
     });
     setHasError(true);
-    setIsPlaying(false);
     setIsReady(false);
+    setIsPlaying(false);
   };
 
+  // Toggle play/pause - ONLY on user interaction (click)
   const togglePlay = () => {
     const audio = audioRef.current;
-    if (!audio || hasError || !isReady) return;
+    if (!audio || !isReady || hasError) return;
 
     try {
       if (isPlaying) {
@@ -120,15 +113,16 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
+              console.log("[MusicPlayer] Playback started");
               setIsPlaying(true);
             })
-            .catch((error) => {
-              console.error("Play failed:", error);
+            .catch((err) => {
+              console.error("[MusicPlayer] Playback failed:", err);
             });
         }
       }
     } catch (error) {
-      console.error("Playback error:", error);
+      console.error("[MusicPlayer] Play toggle error:", error);
     }
   };
 
@@ -154,20 +148,21 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
         ref={audioRef}
         src={src}
         onLoadedMetadata={handleLoadedMetadata}
+        onCanPlay={handleCanPlay}
         onTimeUpdate={handleTimeUpdate}
         onEnded={() => setIsPlaying(false)}
         onError={handleAudioError}
         crossOrigin="anonymous"
       />
 
-      {/* Error State */}
+      {/* Error Display */}
       {hasError && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-300 rounded-lg">
-          <p className="text-red-700 text-xs font-inter">
-            ⚠️ Audio file not found or cannot be loaded
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-600 text-xs font-inter">
+            ⚠️ Cannot load audio file
           </p>
-          <p className="text-red-600 text-xs font-inter mt-1">
-            Expected: {src}
+          <p className="text-red-500 text-xs font-inter mt-1 truncate">
+            {src}
           </p>
         </div>
       )}
@@ -180,7 +175,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
         <p className="text-[#6B5E5E] font-inter text-sm truncate">{artist}</p>
       </div>
 
-      {/* Progress Bar */}
+      {/* Progress Bar - Show only when ready */}
       {isReady && !hasError && (
         <div className="mb-4">
           <input
@@ -200,9 +195,10 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
       {/* Controls */}
       <div className="flex items-center justify-between gap-3">
+        {/* Mute Button */}
         <button
           onClick={toggleMute}
-          className="text-[#D4AF88] hover:text-[#8B4F6F] transition-colors duration-300 shrink-0 disabled:opacity-50"
+          className="text-[#D4AF88] hover:text-[#8B4F6F] transition-colors duration-300 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
           title={isMuted ? "Unmute" : "Mute"}
           disabled={hasError || !isReady}
         >
@@ -219,6 +215,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
           </svg>
         </button>
 
+        {/* Play Button */}
         <button
           onClick={togglePlay}
           className="bg-[#D4AF88] text-[#3A2F2F] rounded-full p-3 hover:bg-[#C4A078] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
@@ -238,10 +235,14 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
           </svg>
         </button>
 
+        {/* Status Text */}
         <div className="text-[#D4AF88] text-xs font-inter whitespace-nowrap shrink-0">
-          {!isReady && !hasError && <span className="text-gray-500">Loading...</span>}
-          {isReady && !hasError && (
-            <span>{isPlaying ? "Playing" : "Paused"}</span>
+          {hasError ? (
+            <span className="text-red-500">Error</span>
+          ) : !isReady ? (
+            <span className="text-gray-400">Loading...</span>
+          ) : (
+            <span>{isPlaying ? "Playing" : "Ready"}</span>
           )}
         </div>
       </div>
