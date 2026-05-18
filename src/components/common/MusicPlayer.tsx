@@ -192,9 +192,8 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
           onClick={handlePlayPause}
           aria-label={isPlaying ? "Pause audio" : "Play audio"}
           title={isPlaying ? "Pause" : "Play"}
-          className={`flex items-center justify-center w-14 h-14 rounded-full shadow-md transition-transform duration-150 focus:outline-none ${
-            isPlaying ? "bg-[#D4AF88] scale-100" : "bg-white/95"
-          }`}
+          className={`flex items-center justify-center w-14 h-14 rounded-full shadow-md transition-transform duration-150 focus:outline-none ${isPlaying ? "bg-[#D4AF88] scale-100" : "bg-white/95"
+            }`}
         >
           <svg className={`w-6 h-6 ${isPlaying ? "text-[#3A2F2F]" : "text-[#D4AF88]"}`} fill="currentColor" viewBox="0 0 24 24">
             {isPlaying ? <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" /> : <path d="M8 5v14l11-7z" />}
@@ -221,9 +220,8 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
             disabled={!isReady}
             aria-label={isPlaying ? "Pause audio" : "Play audio"}
             title={isPlaying ? "Pause" : "Play"}
-            className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
-              isPlaying ? "bg-[#D4AF88] text-[#3A2F2F]" : "bg-white text-[#D4AF88] border border-[#F0EAE0]"
-            }`}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${isPlaying ? "bg-[#D4AF88] text-[#3A2F2F]" : "bg-white text-[#D4AF88] border border-[#F0EAE0]"
+              }`}
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               {isPlaying ? <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" /> : <path d="M8 5v14l11-7z" />}
