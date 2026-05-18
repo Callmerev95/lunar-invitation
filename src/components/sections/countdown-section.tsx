@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds } from "date-fns";
 
 interface CountdownSectionProps {
   targetDate: string; // Format: "2025-06-15" or ISO string
@@ -29,24 +28,30 @@ export const CountdownSection: React.FC<CountdownSectionProps> = ({
     const calculateCountdown = () => {
       try {
         // Parse target date - handle both "YYYY-MM-DD" and ISO formats
-        const targetDateTime = new Date(targetDate);
-
-        // Set target time to end of day (23:59:59)
-        targetDateTime.setHours(23, 59, 59, 999);
+        // Create date at midnight UTC to ensure consistency
+        const [year, month, day] = targetDate.split("-").map(Number);
+        const targetDateTime = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
 
         const now = new Date();
 
-        // Calculate differences using date-fns
-        const totalDays = differenceInDays(targetDateTime, now);
+        // Calculate total milliseconds difference
+        const timeDiff = targetDateTime.getTime() - now.getTime();
 
-        if (totalDays >= 0) {
-          // Get hours, minutes, seconds for the remaining time
-          const hours = differenceInHours(targetDateTime, now) % 24;
-          const minutes = differenceInMinutes(targetDateTime, now) % 60;
-          const seconds = differenceInSeconds(targetDateTime, now) % 60;
+        if (timeDiff > 0) {
+          // Calculate time units from milliseconds
+          const totalSeconds = Math.floor(timeDiff / 1000);
+          const totalMinutes = Math.floor(totalSeconds / 60);
+          const totalHours = Math.floor(totalMinutes / 60);
+          const totalDays = Math.floor(totalHours / 24);
+
+          // Calculate remaining units
+          const days = totalDays;
+          const hours = totalHours % 24;
+          const minutes = totalMinutes % 60;
+          const seconds = totalSeconds % 60;
 
           setTimeUnits([
-            { label: "Hari", value: totalDays },
+            { label: "Hari", value: days },
             { label: "Jam", value: hours },
             { label: "Menit", value: minutes },
             { label: "Detik", value: seconds },
