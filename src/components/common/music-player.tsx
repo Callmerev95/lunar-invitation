@@ -11,21 +11,22 @@ interface MusicPlayerProps {
 export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   title = "Romantic Music",
   artist = "Lunar Invitation",
-  src = "/music/default.mp3",
+  src = "/music/default.wav",
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [displayTime, setDisplayTime] = useState(0);
+  const [hasError, setHasError] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const togglePlay = () => {
-    if (audioRef.current) {
+    if (audioRef.current && !hasError) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play();
+        audioRef.current.play().catch(() => setHasError(true));
       }
       setIsPlaying(!isPlaying);
     }
@@ -77,6 +78,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={() => setIsPlaying(false)}
+        onError={() => setHasError(true)}
       />
 
       {/* Song Info */}

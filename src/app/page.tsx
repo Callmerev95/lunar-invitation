@@ -83,6 +83,8 @@ export default function Home() {
         bride="Putri Amanda"
         date="Minggu, 15 Juni 2025"
         location="Ballroom Grand Hyatt Jakarta"
+        coupleNames="Muhammad Reynard & Putri Amanda"
+        invitationUrl="https://lunar-invitation.vercel.app"
       />
 
       {/* Countdown Section */}
