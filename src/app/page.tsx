@@ -116,8 +116,8 @@ export default function Home() {
 
       {/* Music Player */}
       <MusicPlayer
-        title="Romantic Evening"
-        artist="Composed by Lunaria"
+        title="My Everything"
+        artist="Composed by Gleen Fredly"
         src="/music/background-music.mp3"
       />
 
