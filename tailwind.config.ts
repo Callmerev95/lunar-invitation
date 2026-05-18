@@ -8,6 +8,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      aspectRatio: {
+        "3/4": "3 / 4",
+      },
       fontFamily: {
         inter: ["var(--font-inter)", "system-ui", "sans-serif"],
         playfair: ["var(--font-playfair)", "serif"],

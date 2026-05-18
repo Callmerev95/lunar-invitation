@@ -58,7 +58,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Left: Image */}
           <motion.div
-            className="relative w-full aspect-3/4 rounded-3xl overflow-hidden shadow-elegant"
+            className="relative w-full aspect-3/4 rounded-3xl overflow-hidden shadow-elegant bg-[#F5F0E8]"
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
@@ -71,10 +71,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               priority
               quality={90}
               sizes="(max-width: 768px) 100vw, 50vw"
-              loading="eager"
             />
             {/* Overlay Gradient */}
-            <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent pointer-events-none" />
           </motion.div>
 
           {/* Right: Text Content */}
