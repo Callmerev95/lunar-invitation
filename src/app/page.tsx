@@ -118,7 +118,7 @@ export default function Home() {
       <MusicPlayer
         title="Romantic Evening"
         artist="Composed by Lunaria"
-        src="/music/default.mp3"
+        src="/music/background-music.mp3"
       />
 
       <Footer />

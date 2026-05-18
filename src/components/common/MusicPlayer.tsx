@@ -12,7 +12,7 @@ interface MusicPlayerProps {
 export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   title = "Background Music",
   artist = "Lunar Invitation",
-  src = "/music/background-music.wav",
+  src = "/music/background-music.mp3",
   autoPlay = false,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -48,13 +48,18 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     const audio = audioRef.current;
     if (!audio) return;
 
+    console.log("[MusicPlayer] loadedmetadata event triggered");
+    console.log("[MusicPlayer] Duration:", audio.duration);
+
     const dur = audio.duration;
     if (isFinite(dur) && dur > 0) {
       setDuration(dur);
       setIsReady(true);
       setHasError(false);
+      console.log("[MusicPlayer] Audio ready. Duration:", dur);
     } else {
       setHasError(true);
+      console.error("[MusicPlayer] Invalid duration:", dur);
     }
   };
 
@@ -90,7 +95,13 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   };
 
   const handleAudioError = () => {
-    console.error("Audio loading error - check file path and format");
+    const audio = audioRef.current;
+    console.error("[MusicPlayer] Audio error event triggered");
+    console.error("[MusicPlayer] Expected path:", audio?.src);
+    console.error("[MusicPlayer] Error details:", {
+      error: audio?.error?.code,
+      message: audio?.error?.message,
+    });
     setHasError(true);
     setIsPlaying(false);
     setIsReady(false);
