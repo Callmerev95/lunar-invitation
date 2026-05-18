@@ -101,7 +101,10 @@ export default function Home() {
       <GallerySection images={galleryImages} />
 
       {/* RSVP Section */}
-      <RSVPSection weddingDate="2025-06-15" />
+      <RSVPSection 
+        weddingDate="2025-06-15"
+        googleFormUrl="https://docs.google.com/forms/d/e/1FAIpQLSc_placeholder/viewform?usp=send_form"
+      />
 
       {/* QR Code Section */}
       <QRSection

@@ -19,10 +19,12 @@ type RSVPFormData = z.infer<typeof rsvpSchema>;
 
 interface RSVPSectionProps {
   weddingDate?: string;
+  googleFormUrl?: string; // URL untuk redirect Google Form
 }
 
 export const RSVPSection: React.FC<RSVPSectionProps> = ({
-  weddingDate = "2025-06-15"
+  weddingDate = "2025-06-15",
+  googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSc_placeholder/viewform?usp=send_form",
 }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,22 +50,33 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
   const onSubmit = async (data: RSVPFormData) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Prepare Google Form pre-fill URL with data
+      const formParams = new URLSearchParams();
+      
+      // Map form fields to Google Form entry IDs (you need to update these with actual IDs)
+      // Format: entry.XXXXXXXXX corresponds to form field IDs
+      formParams.append("entry.1234567890", data.name); // Replace with actual entry ID
+      formParams.append("entry.0987654321", String(data.guestCount)); // Replace with actual entry ID
+      formParams.append("entry.5555555555", data.attendanceStatus || ""); // Replace with actual entry ID
+      formParams.append("entry.6666666666", data.message || ""); // Replace with actual entry ID
 
-      console.log("RSVP Data:", data);
+      const googleFormSubmitUrl = `${googleFormUrl}&${formParams.toString()}`;
 
       // Show success message
       setIsSubmitted(true);
       reset();
 
-      // Reset after 5 seconds
+      // Wait a moment, then redirect to Google Form
       setTimeout(() => {
-        setIsSubmitted(false);
-      }, 5000);
+        window.open(googleFormSubmitUrl, "_blank");
+        
+        // Close success message after another 2 seconds
+        setTimeout(() => {
+          setIsSubmitted(false);
+        }, 2000);
+      }, 1500);
     } catch (error) {
       console.error("Error submitting RSVP:", error);
-    } finally {
       setIsLoading(false);
     }
   };
