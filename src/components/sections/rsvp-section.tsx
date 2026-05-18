@@ -35,7 +35,6 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
   } = useForm<RSVPFormData>({
     resolver: zodResolver(rsvpSchema),
     defaultValues: {
@@ -45,14 +44,6 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
       message: "",
     },
   });
-
-  // Update local state when form value changes to avoid React Compiler memoization issues
-  React.useEffect(() => {
-    const subscription = watch((value) => {
-      setAttendanceStatus(value.attendanceStatus);
-    });
-    return () => subscription.unsubscribe();
-  }, [watch]);
 
   const onSubmit = async (data: RSVPFormData) => {
     setIsLoading(true);
@@ -210,8 +201,8 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
                       placeholder="Masukkan nama Anda"
                       {...register("name")}
                       className={`w-full px-6 py-3 rounded-2xl font-inter text-base bg-[#FAF7F2] border-2 transition-all duration-300 focus:outline-none ${errors.name
-                          ? "border-red-400 focus:border-red-500"
-                          : "border-[#F5F0E8] focus:border-[#D4AF88]"
+                        ? "border-red-400 focus:border-red-500"
+                        : "border-[#F5F0E8] focus:border-[#D4AF88]"
                         }`}
                     />
                     {errors.name && (
@@ -237,8 +228,8 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
                       placeholder="1"
                       {...register("guestCount", { valueAsNumber: true })}
                       className={`w-full px-6 py-3 rounded-2xl font-inter text-base bg-[#FAF7F2] border-2 transition-all duration-300 focus:outline-none ${errors.guestCount
-                          ? "border-red-400 focus:border-red-500"
-                          : "border-[#F5F0E8] focus:border-[#D4AF88]"
+                        ? "border-red-400 focus:border-red-500"
+                        : "border-[#F5F0E8] focus:border-[#D4AF88]"
                         }`}
                     />
                     {errors.guestCount && (
@@ -265,8 +256,8 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
                         <motion.label
                           key={option.value}
                           className={`relative flex items-center p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${attendanceStatus === option.value
-                              ? "border-[#D4AF88] bg-[#FFF9F0]"
-                              : "border-[#F5F0E8] bg-[#FAF7F2] hover:border-[#D4AF88] hover:bg-[#FFF9F0]"
+                            ? "border-[#D4AF88] bg-[#FFF9F0]"
+                            : "border-[#F5F0E8] bg-[#FAF7F2] hover:border-[#D4AF88] hover:bg-[#FFF9F0]"
                             }`}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
@@ -275,12 +266,13 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
                             type="radio"
                             value={option.value}
                             {...register("attendanceStatus")}
+                            onChange={(e) => setAttendanceStatus(e.target.value)}
                             className="sr-only"
                           />
                           <div
                             className={`w-4 h-4 rounded-full border-2 mr-3 transition-all duration-300 ${attendanceStatus === option.value
-                                ? "border-[#D4AF88] bg-[#D4AF88]"
-                                : "border-[#D4AF88]"
+                              ? "border-[#D4AF88] bg-[#D4AF88]"
+                              : "border-[#D4AF88]"
                               }`}
                           />
                           <span className="font-inter text-base font-500 text-[#3A2F2F]">
@@ -310,8 +302,8 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
                       rows={4}
                       {...register("message")}
                       className={`w-full px-6 py-3 rounded-2xl font-inter text-base bg-[#FAF7F2] border-2 transition-all duration-300 focus:outline-none resize-none ${errors.message
-                          ? "border-red-400 focus:border-red-500"
-                          : "border-[#F5F0E8] focus:border-[#D4AF88]"
+                        ? "border-red-400 focus:border-red-500"
+                        : "border-[#F5F0E8] focus:border-[#D4AF88]"
                         }`}
                     />
                     {errors.message && (
