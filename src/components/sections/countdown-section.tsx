@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds } from "date-fns";
 
 interface CountdownSectionProps {
   targetDate: string; // Format: "2025-06-15" or ISO string
@@ -26,26 +27,48 @@ export const CountdownSection: React.FC<CountdownSectionProps> = ({
 
   useEffect(() => {
     const calculateCountdown = () => {
-      const target = new Date(targetDate).getTime();
-      const now = new Date().getTime();
-      const difference = target - now;
+      try {
+        // Parse target date - handle both "YYYY-MM-DD" and ISO formats
+        const targetDateTime = new Date(targetDate);
+        
+        // Set target time to end of day (23:59:59)
+        targetDateTime.setHours(23, 59, 59, 999);
+        
+        const now = new Date();
 
-      if (difference > 0) {
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((difference / 1000 / 60) % 60);
-        const seconds = Math.floor((difference / 1000) % 60);
+        // Calculate differences using date-fns
+        const totalDays = differenceInDays(targetDateTime, now);
+        
+        if (totalDays >= 0) {
+          // Get hours, minutes, seconds for the remaining time
+          const hours = differenceInHours(targetDateTime, now) % 24;
+          const minutes = differenceInMinutes(targetDateTime, now) % 60;
+          const seconds = differenceInSeconds(targetDateTime, now) % 60;
 
-        setTimeUnits([
-          { label: "Hari", value: days },
-          { label: "Jam", value: hours },
-          { label: "Menit", value: minutes },
-          { label: "Detik", value: seconds },
-        ]);
+          setTimeUnits([
+            { label: "Hari", value: totalDays },
+            { label: "Jam", value: hours },
+            { label: "Menit", value: minutes },
+            { label: "Detik", value: seconds },
+          ]);
+        } else {
+          // Event has passed
+          setTimeUnits([
+            { label: "Hari", value: 0 },
+            { label: "Jam", value: 0 },
+            { label: "Menit", value: 0 },
+            { label: "Detik", value: 0 },
+          ]);
+        }
+      } catch (error) {
+        console.error("Error calculating countdown:", error);
       }
     };
 
+    // Calculate immediately on mount
     calculateCountdown();
+    
+    // Then update every second
     const interval = setInterval(calculateCountdown, 1000);
 
     return () => clearInterval(interval);
