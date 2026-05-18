@@ -48,7 +48,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   return (
     <section
       id="hero"
-      className="relative w-full min-h-screen flex items-center justify-center overflow-hidden pt-20 md:pt-0"
+      className="relative w-full min-h-screen flex items-center justify-center overflow-hidden pt-24 md:pt-32 lg:pt-40"
     >
       {/* Background Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-gold-cream opacity-30 pointer-events-none" />
@@ -69,7 +69,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               fill
               className="object-cover"
               priority
-              quality={90}
+              quality={75}
               sizes="(max-width: 768px) 100vw, 50vw"
             />
             {/* Overlay Gradient */}
