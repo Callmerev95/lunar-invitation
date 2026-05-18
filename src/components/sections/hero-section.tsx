@@ -70,7 +70,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               fill
               className="object-cover"
               priority
+              quality={90}
               sizes="(max-width: 768px) 100vw, 50vw"
+              loading="eager"
             />
             {/* Overlay Gradient */}
             <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent" />
