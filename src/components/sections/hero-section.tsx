@@ -60,9 +60,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <motion.div
             className="relative w-full aspect-3/4 rounded-3xl overflow-hidden shadow-elegant"
             initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            viewport={{ once: true }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
           >
             <Image
               src={brideImage}
