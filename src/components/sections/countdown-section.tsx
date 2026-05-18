@@ -30,15 +30,15 @@ export const CountdownSection: React.FC<CountdownSectionProps> = ({
       try {
         // Parse target date - handle both "YYYY-MM-DD" and ISO formats
         const targetDateTime = new Date(targetDate);
-        
+
         // Set target time to end of day (23:59:59)
         targetDateTime.setHours(23, 59, 59, 999);
-        
+
         const now = new Date();
 
         // Calculate differences using date-fns
         const totalDays = differenceInDays(targetDateTime, now);
-        
+
         if (totalDays >= 0) {
           // Get hours, minutes, seconds for the remaining time
           const hours = differenceInHours(targetDateTime, now) % 24;
@@ -67,7 +67,7 @@ export const CountdownSection: React.FC<CountdownSectionProps> = ({
 
     // Calculate immediately on mount
     calculateCountdown();
-    
+
     // Then update every second
     const interval = setInterval(calculateCountdown, 1000);
 

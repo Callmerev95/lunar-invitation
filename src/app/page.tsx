@@ -103,7 +103,7 @@ export default function Home() {
       <GallerySection images={galleryImages} />
 
       {/* RSVP Section */}
-      <RSVPSection 
+      <RSVPSection
         weddingDate="2025-06-15"
         googleFormUrl="https://docs.google.com/forms/d/e/1FAIpQLSc_placeholder/viewform?usp=send_form"
       />

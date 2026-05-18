@@ -52,7 +52,7 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
     try {
       // Prepare Google Form pre-fill URL with data
       const formParams = new URLSearchParams();
-      
+
       // Map form fields to Google Form entry IDs (you need to update these with actual IDs)
       // Format: entry.XXXXXXXXX corresponds to form field IDs
       formParams.append("entry.1234567890", data.name); // Replace with actual entry ID
@@ -69,7 +69,7 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
       // Wait a moment, then redirect to Google Form
       setTimeout(() => {
         window.open(googleFormSubmitUrl, "_blank");
-        
+
         // Close success message after another 2 seconds
         setTimeout(() => {
           setIsSubmitted(false);

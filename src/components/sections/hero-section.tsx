@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ElegantButton } from "../common/elegant-button";
-import { ShareButtons } from "../common/share-buttons";
+
 
 interface HeroSectionProps {
   brideImage: string;
@@ -22,8 +22,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   bride,
   date,
   location = "Lokasi Acara",
-  coupleNames = `${groom} & ${bride}`,
-  invitationUrl = "https://lunar-invitation.vercel.app",
 }) => {
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -138,17 +136,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </ElegantButton>
             </motion.div>
 
-            {/* Share Buttons */}
-            <motion.div
-              variants={itemVariants}
-              className="flex justify-center md:justify-start"
-            >
-              <ShareButtons
-                coupleNames={coupleNames}
-                invitationUrl={invitationUrl}
-                weddingDate={date}
-              />
-            </motion.div>
+
 
             {/* Scroll Indicator */}
             <motion.div

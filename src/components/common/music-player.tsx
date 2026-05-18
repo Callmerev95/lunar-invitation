@@ -1,42 +1,91 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 interface MusicPlayerProps {
   title?: string;
   artist?: string;
   src?: string;
+  autoPlay?: boolean;
 }
 
 export const MusicPlayer: React.FC<MusicPlayerProps> = ({
-  title = "Romantic Music",
+  title = "Our Song",
   artist = "Lunar Invitation",
-  src = "/music/default.wav",
+  src = "/music/background-music.mp3",
+  autoPlay = true,
 }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(autoPlay);
+  const [isMuted, setIsMuted] = useState(true); // Start muted for better UX
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [displayTime, setDisplayTime] = useState(0);
   const [hasError, setHasError] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  // Auto-play on mount
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const playAudio = async () => {
+      try {
+        if (autoPlay && isMuted) {
+          await audio.play();
+          setIsPlaying(true);
+        }
+      } catch (error) {
+        console.error("Autoplay failed:", error);
+        setHasError(true);
+      }
+    };
+
+    // Delay autoplay slightly to allow audio to be ready
+    setTimeout(playAudio, 500);
+
+    return () => {
+      if (audio) audio.pause();
+    };
+  }, [autoPlay, isMuted]);
+
   const togglePlay = () => {
-    if (audioRef.current && !hasError) {
+    const audio = audioRef.current;
+    if (!audio || hasError) return;
+
+    try {
       if (isPlaying) {
-        audioRef.current.pause();
+        audio.pause();
       } else {
-        audioRef.current.play().catch(() => setHasError(true));
+        audio.play();
       }
       setIsPlaying(!isPlaying);
+    } catch (error) {
+      console.error("Playback error:", error);
+      setHasError(true);
     }
   };
 
   const toggleMute = () => {
-    if (audioRef.current) {
-      audioRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const newMuted = !isMuted;
+    audio.muted = newMuted;
+    setIsMuted(newMuted);
+
+    // If unmuting and not playing, start playing
+    if (!newMuted && !isPlaying) {
+      audio.play();
+      setIsPlaying(true);
     }
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const newVolume = parseFloat(e.currentTarget.value);
+    audio.volume = newVolume;
   };
 
   const handleTimeUpdate = () => {
@@ -71,21 +120,30 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   };
 
   return (
-    <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-40 bg-white rounded-3xl shadow-elegant p-4 md:p-6 w-80 md:w-96 animate-fade-in">
+    <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-40 bg-white/95 rounded-3xl shadow-elegant p-4 md:p-6 w-80 md:w-96 animate-fade-in backdrop-blur-sm">
       <audio
         ref={audioRef}
         src={src}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={() => setIsPlaying(false)}
-        onError={() => setHasError(true)}
+        onError={() => {
+          console.error("Audio error occurred");
+          setHasError(true);
+        }}
+        crossOrigin="anonymous"
       />
 
       {/* Song Info */}
       <div className="mb-4">
-        <p className="text-[#D4AF88] font-playfair font-600 text-lg truncate">
-          {title}
-        </p>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[#D4AF88] font-playfair font-600 text-lg truncate">
+            {title}
+          </p>
+          {hasError && (
+            <span className="text-xs text-red-500 font-inter">Error</span>
+          )}
+        </div>
         <p className="text-[#6B5E5E] font-inter text-sm truncate">{artist}</p>
       </div>
 
@@ -97,7 +155,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
           max="100"
           value={progress}
           onChange={handleProgressChange}
-          className="w-full h-1 bg-[#F5F0E8] rounded-full cursor-pointer accent-[#D4AF88]"
+          className="w-full h-1 bg-[#F5F0E8] rounded-full cursor-pointer accent-[#D4AF88] hover:accent-[#C4A078]"
         />
         <div className="flex justify-between text-xs text-[#6B5E5E] mt-2 font-inter">
           <span>{formatTime(displayTime)}</span>
@@ -105,46 +163,62 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
         </div>
       </div>
 
+      {/* Volume Control */}
+      <div className="mb-4 px-2">
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.1"
+          defaultValue={0.5}
+          onChange={handleVolumeChange}
+          className="w-full h-0.5 bg-[#F5F0E8] rounded-full cursor-pointer accent-[#D4AF88]"
+          title="Volume control"
+        />
+      </div>
+
       {/* Controls */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <button
           onClick={toggleMute}
-          className="text-[#D4AF88] hover:text-[#8B4F6F] transition-colors duration-300"
+          className="text-[#D4AF88] hover:text-[#8B4F6F] transition-colors duration-300 shrink-0"
           title={isMuted ? "Unmute" : "Mute"}
+          disabled={hasError}
         >
           <svg
             className="w-5 h-5"
             fill="currentColor"
-            viewBox="0 0 20 20"
+            viewBox="0 0 24 24"
           >
             {isMuted ? (
-              <path d="M2 4.5a.5.5 0 00-.5.5v10a.5.5 0 00.5.5h2.17l3.66 3.66a.5.5 0 00.85-.35V1.19a.5.5 0 00-.85-.35L4.17 4.5H2zm15.354-.854l-1.415-1.415L11 7.379V3.5a.5.5 0 00-1 0v8.5a.5.5 0 001 0v-3.879l4.939 4.939l1.415-1.415L11 8.121l5.354-5.975z" />
+              <path d="M12 4L6 8H2v8h4l6 4v-4l6 4V4l-6 4zm7-2l-2-2m0 8l2-2m-2 0l-2 2m2-2l2 2" />
             ) : (
-              <path d="M2 4.5a.5.5 0 00-.5.5v10a.5.5 0 00.5.5h2.17l3.66 3.66a.5.5 0 00.85-.35V1.19a.5.5 0 00-.85-.35L4.17 4.5H2zm11.303-4.396a.5.5 0 00-.707.707c1.864 1.864 3.02 4.44 3.02 7.289 0 2.849-1.156 5.425-3.02 7.289a.5.5 0 00.707.707c2.118-2.118 3.44-5.05 3.44-7.996s-1.322-5.878-3.44-7.996zM8.5 3.5v13a.5.5 0 001 0v-13a.5.5 0 00-1 0z" />
+              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
             )}
           </svg>
         </button>
 
         <button
           onClick={togglePlay}
-          className="bg-[#D4AF88] text-[#3A2F2F] rounded-full p-3 hover:bg-[#C4A078] transition-colors duration-300"
+          className="bg-[#D4AF88] text-[#3A2F2F] rounded-full p-3 hover:bg-[#C4A078] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
           title={isPlaying ? "Pause" : "Play"}
+          disabled={hasError}
         >
           <svg
             className="w-6 h-6"
             fill="currentColor"
-            viewBox="0 0 20 20"
+            viewBox="0 0 24 24"
           >
             {isPlaying ? (
-              <path d="M6 4a1 1 0 00-1 1v10a1 1 0 001 1h1a1 1 0 001-1V5a1 1 0 00-1-1H6zM13 4a1 1 0 00-1 1v10a1 1 0 001 1h1a1 1 0 001-1V5a1 1 0 00-1-1h-1z" />
+              <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
             ) : (
-              <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+              <path d="M8 5v14l11-7z" />
             )}
           </svg>
         </button>
 
-        <div className="text-[#D4AF88] text-sm font-inter">
-          <span>{isPlaying ? "Playing" : "Paused"}</span>
+        <div className="text-[#D4AF88] text-xs font-inter whitespace-nowrap shrink-0">
+          <span>{isPlaying ? "Playing" : isMuted ? "Muted" : "Ready"}</span>
         </div>
       </div>
     </div>
