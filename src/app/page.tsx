@@ -9,6 +9,7 @@ import { EventDetails } from "@/components/sections/event-details";
 import { TimelineSection } from "@/components/sections/timeline-section";
 import { GallerySection } from "@/components/sections/gallery-section";
 import { RSVPSection } from "@/components/sections/rsvp-section";
+import { QRSection } from "@/components/sections/qr-section";
 
 export default function Home() {
   // Sample event data
@@ -101,6 +102,12 @@ export default function Home() {
 
       {/* RSVP Section */}
       <RSVPSection weddingDate="2025-06-15" />
+
+      {/* QR Code Section */}
+      <QRSection
+        coupleNames="Muhammad Reynard & Putri Amanda"
+        weddingDate="15 Juni 2025"
+      />
 
       {/* Music Player */}
       <MusicPlayer
