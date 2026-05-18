@@ -21,8 +21,8 @@ interface RSVPSectionProps {
   weddingDate?: string;
 }
 
-export const RSVPSection: React.FC<RSVPSectionProps> = ({ 
-  weddingDate = "2025-06-15" 
+export const RSVPSection: React.FC<RSVPSectionProps> = ({
+  weddingDate = "2025-06-15"
 }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -50,13 +50,13 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      
+
       console.log("RSVP Data:", data);
-      
+
       // Show success message
       setIsSubmitted(true);
       reset();
-      
+
       // Reset after 5 seconds
       setTimeout(() => {
         setIsSubmitted(false);
@@ -200,11 +200,10 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
                       type="text"
                       placeholder="Masukkan nama Anda"
                       {...register("name")}
-                      className={`w-full px-6 py-3 rounded-2xl font-inter text-base bg-[#FAF7F2] border-2 transition-all duration-300 focus:outline-none ${
-                        errors.name
+                      className={`w-full px-6 py-3 rounded-2xl font-inter text-base bg-[#FAF7F2] border-2 transition-all duration-300 focus:outline-none ${errors.name
                           ? "border-red-400 focus:border-red-500"
                           : "border-[#F5F0E8] focus:border-[#D4AF88]"
-                      }`}
+                        }`}
                     />
                     {errors.name && (
                       <motion.p
@@ -228,11 +227,10 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
                       max="10"
                       placeholder="1"
                       {...register("guestCount", { valueAsNumber: true })}
-                      className={`w-full px-6 py-3 rounded-2xl font-inter text-base bg-[#FAF7F2] border-2 transition-all duration-300 focus:outline-none ${
-                        errors.guestCount
+                      className={`w-full px-6 py-3 rounded-2xl font-inter text-base bg-[#FAF7F2] border-2 transition-all duration-300 focus:outline-none ${errors.guestCount
                           ? "border-red-400 focus:border-red-500"
                           : "border-[#F5F0E8] focus:border-[#D4AF88]"
-                      }`}
+                        }`}
                     />
                     {errors.guestCount && (
                       <motion.p
@@ -257,11 +255,10 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
                       ].map((option) => (
                         <motion.label
                           key={option.value}
-                          className={`relative flex items-center p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
-                            attendanceStatus === option.value
+                          className={`relative flex items-center p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${attendanceStatus === option.value
                               ? "border-[#D4AF88] bg-[#FFF9F0]"
                               : "border-[#F5F0E8] bg-[#FAF7F2] hover:border-[#D4AF88] hover:bg-[#FFF9F0]"
-                          }`}
+                            }`}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
@@ -272,11 +269,10 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
                             className="sr-only"
                           />
                           <div
-                            className={`w-4 h-4 rounded-full border-2 mr-3 transition-all duration-300 ${
-                              attendanceStatus === option.value
+                            className={`w-4 h-4 rounded-full border-2 mr-3 transition-all duration-300 ${attendanceStatus === option.value
                                 ? "border-[#D4AF88] bg-[#D4AF88]"
                                 : "border-[#D4AF88]"
-                            }`}
+                              }`}
                           />
                           <span className="font-inter text-base font-500 text-[#3A2F2F]">
                             {option.label}
@@ -304,11 +300,10 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
                       placeholder="Tinggalkan pesan atau ucapan bahagia untuk kami..."
                       rows={4}
                       {...register("message")}
-                      className={`w-full px-6 py-3 rounded-2xl font-inter text-base bg-[#FAF7F2] border-2 transition-all duration-300 focus:outline-none resize-none ${
-                        errors.message
+                      className={`w-full px-6 py-3 rounded-2xl font-inter text-base bg-[#FAF7F2] border-2 transition-all duration-300 focus:outline-none resize-none ${errors.message
                           ? "border-red-400 focus:border-red-500"
                           : "border-[#F5F0E8] focus:border-[#D4AF88]"
-                      }`}
+                        }`}
                     />
                     {errors.message && (
                       <motion.p
@@ -371,10 +366,10 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
             <div>
               <p className="text-[#3A2F2F] font-playfair font-600 mb-1">Informasi Penting</p>
               <p className="text-[#6B5E5E] font-inter text-sm leading-relaxed">
-                Mohon lakukan konfirmasi sebelum {new Date(weddingDate).toLocaleDateString("id-ID", { 
-                  year: "numeric", 
-                  month: "long", 
-                  day: "numeric" 
+                Mohon lakukan konfirmasi sebelum {new Date(weddingDate).toLocaleDateString("id-ID", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric"
                 })}. Kepastian kehadiran Anda sangat berarti bagi kami.
               </p>
             </div>
